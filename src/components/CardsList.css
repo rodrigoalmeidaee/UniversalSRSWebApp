@@ -1,0 +1,128 @@
+.DeckDetails {
+    margin: 40px;
+}
+
+.DeckDetails h3 {
+    font-size: 32px;
+    margin: -40px -40px 0 -40px;
+    padding: 20px 40px;
+    background: white;
+}
+
+.DeckDetails h3 small {
+    display: block;
+    text-transform: none;
+    font-weight: normal;
+    font-size: 16px;
+    margin-top: 5px;
+    color: #666;
+}
+
+.DeckDetails h3 .flag-icon {
+    border: #ddd solid 1px;
+    background-size: cover;
+}
+
+.CardsList {
+    padding-top: 20px;
+}
+
+.CardsList .Card {
+    display: flex;
+    flex-orientation: horizontal;
+}
+
+.CardsList .Card.isUpdating {
+    opacity: 0.5;
+}
+
+.Card-front, .Card-back {
+    background: white;
+    border: #ddd solid 1px;
+}
+
+.Card-front, .Card-back, .Card-direction {
+    vertical-align: middle;
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.Card-front {
+    flex: 1;
+}
+
+.Card-back {
+    flex: 2;
+}
+
+.Card-image-and-sound {
+    width: 50px;
+    height: 50px;
+    margin-top: 5px;
+    background-size: cover;
+    background-position: 50% 50%;
+}
+
+.Card-back pre, .Card-front pre {
+    white-space: pre-wrap;
+    font-family: sans-serif;
+    text-align: left;
+    padding: 1em;
+    margin: 0;
+}
+
+.Card-back textarea, .Card-front textarea {
+    font-family: sans-serif;
+    font-size: 16px;
+    padding: 1em;
+    margin: 0;
+}
+
+.NewCardContainer {
+    background: #f3d7d6;
+    margin-left: -40px;
+    margin-right: -40px;
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.Card-actions {
+    text-align: left;
+    padding: 5px;
+    font-size: 12px;
+}
+
+.Card-actions a:hover {
+    font-weight: bold;
+}
+
+.Card-actions a + a {
+    margin-left: 20px;
+}
+
+.CardMetadata {
+    text-align: left;
+}
+
+
+.CardMetadata > div {
+    display: flex;
+    flex-orientation: horizontal;
+}
+
+.CardMetadata label {
+    width: 135px;
+    font-size: 13px;
+    margin: 5px 5px;
+}
+
+.CardMetadata input:not([type=checkbox]) {
+    flex: 1;
+    margin: 1px;
+}
+
+.CardMetadata input[type=checkbox] {
+    margin-top: 5px;
+}

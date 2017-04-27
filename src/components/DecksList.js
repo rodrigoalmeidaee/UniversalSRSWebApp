@@ -1,0 +1,100 @@
+import { connect } from 'react-redux';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types'
+
+import { fetchDecksIfNeeded } from '../actions'
+
+import './DecksList.css';
+import '../../node_modules/flag-icon-css/css/flag-icon.css';
+
+
+class DecksList extends Component {
+
+  componentWillMount() {
+    if (!this.props.isFetching && !this.props.decks) {
+      this.props.fetchDecksIfNeeded();
+    }
+  }
+
+  render() {
+    if (this.props.isFetching) {
+      return (
+        <div className="DecksList">
+          <div className="spinner">Loading...</div>
+        </div>
+      );
+    }
+    else if (this.props.decks) {
+      return (
+        <div className="DecksList">
+          <h3>Available Decks</h3>
+          {this.props.decks.map(deck => <Deck deck={deck} key={deck.id} />)}
+        </div>
+      );
+    } else {
+      return (
+        <div className="DecksList">
+          Not available
+        </div>
+      );
+    }
+  }
+}
+
+
+class Deck extends Component {
+
+  static contextTypes = {
+    router: PropTypes.shape({
+      history: PropTypes.shape({
+        push: PropTypes.func.isRequired,
+      }).isRequired
+    }).isRequired
+  }
+
+  render() {
+    return (
+      <div className="Deck">
+        <span className="Deck-cardCount">
+          {this.props.deck.card_count} cards
+        </span>
+        <span className="Deck-title">
+          <span className={ `flag-icon flag-icon-${this.props.deck.language}` } />
+          {this.props.deck.title}
+        </span>
+        <hr />
+        <div className="Deck-actions">
+          <div className="Deck-action">
+            Study
+          </div>
+          <div className="Deck-action" onClick={() => this.onDeckClicked()}>
+            View/Edit
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  onDeckClicked(deck) {
+    const { history } = this.context.router;
+    history.push('/decks/' + this.props.deck.id);
+  }
+}
+
+
+DecksList = connect(
+  function mapStateToProps(state) {
+    return {
+      isFetching: state.deckList.isFetching,
+      decks: state.deckList.decks
+    };
+  },
+  function mapDispatchToProps(dispatch) {
+    return {
+      fetchDecksIfNeeded: () => dispatch(fetchDecksIfNeeded())
+    }
+  }
+)(DecksList)
+
+
+export default DecksList;

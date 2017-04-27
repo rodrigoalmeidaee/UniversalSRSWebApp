@@ -1,0 +1,62 @@
+.DecksList {
+    margin: 40px;
+}
+
+.DecksList .Deck {
+    background: white;
+    padding: 16px 20px 0px 20px;
+    text-align: left;
+    border-left: #3ccfcf solid 5px;
+}
+
+.DecksList .Deck + .Deck {
+    margin-top: 20px;
+}
+
+.Deck-cardCount {
+    color: #666;
+    font-weight: bold;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.Deck .flag-icon {
+    margin-right: 8px;
+    border: #ddd solid 1px;
+    background-size: cover;
+}
+
+.Deck .Deck-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.Deck hr {
+    background: #ddd;
+    height: 1px;
+    margin: 10px -20px 0px -20px;
+    border: none;
+}
+
+.Deck .Deck-actions {
+    margin-left: -20px;
+}
+
+.Deck .Deck-action {
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 10px 20px 9px 20px;
+    border-bottom: white solid 1px;
+    color: #008383;
+    text-align: center;
+    border-right: #eee solid 1px;
+}
+
+.Deck .Deck-action:hover {
+    color: #3ccfcf;
+}
