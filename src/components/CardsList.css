@@ -30,31 +30,45 @@
 .CardsList .Card {
     display: flex;
     flex-orientation: horizontal;
+    background: white;
+    border: #ddd solid 1px;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-left: #ccc solid 5px;
 }
 
 .CardsList .Card.isUpdating {
     opacity: 0.5;
+    border-left-color: #d00;
 }
 
-.Card-front, .Card-back {
-    background: white;
-    border: #ddd solid 1px;
+.CardsList .Card.isNew {
+    border-left-color: #d00;
 }
 
-.Card-front, .Card-back, .Card-direction {
-    vertical-align: middle;
-    margin: 5px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+.Card .Card-meta {
+    width: 50px;
+    margin: 0px 5px;
 }
 
-.Card-front {
+.Card.reverse {
+    border-left: #3ccfcf solid 5px;
+}
+
+.Card .Card-body {
     flex: 1;
+    font-size: 14px;
+    text-align: left
+}
+
+.Card-front, .Card-front textarea {
+    font-size: 14px;
+    font-weight: bold;
 }
 
 .Card-back {
-    flex: 2;
+    font-size: 14px;
 }
 
 .Card-image-and-sound {
@@ -65,19 +79,22 @@
     background-position: 50% 50%;
 }
 
-.Card-back pre, .Card-front pre {
-    white-space: pre-wrap;
-    font-family: sans-serif;
-    text-align: left;
-    padding: 1em;
+.Card .card-text-block {
+    padding: 0.5em;
     margin: 0;
 }
 
 .Card-back textarea, .Card-front textarea {
     font-family: sans-serif;
-    font-size: 16px;
-    padding: 1em;
+    font-size: 14px;
+    padding: 0.5em;
     margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    overflow: hidden;
+    height: 30px;
+    border: none;
 }
 
 .NewCardContainer {
@@ -112,10 +129,11 @@
     flex-orientation: horizontal;
 }
 
-.CardMetadata label {
-    width: 135px;
+.Card-body label {
+    width: 75px;
     font-size: 13px;
     margin: 5px 5px;
+    display: inline-block;
 }
 
 .CardMetadata input:not([type=checkbox]) {
@@ -125,4 +143,36 @@
 
 .CardMetadata input[type=checkbox] {
     margin-top: 5px;
+}
+
+.sounded-text {
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-decoration-color: #888;
+    cursor: pointer;
+}
+
+.sounded-text:hover:after {
+    content: '\1F50A';
+    display: inline-block;
+    font-size: 13px;
+    vertical-align: baseline;
+    margin: -3px 3px;
+}
+
+.sounded-text > div {
+    display: inline;
+}
+
+.Card-notes {
+    color: #888;
+}
+
+.Card-notes .card-notes-header {
+    font-weight: bold;
+}
+
+.Card-notes em {
+    font-style: normal;
+    background: #e7e7e7;
 }

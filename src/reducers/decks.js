@@ -1,3 +1,6 @@
+var tempId = 1;
+
+
 const card = (state = {}, action) => {
     switch (action.type) {
         case 'UPDATE_CARD':
@@ -12,7 +15,7 @@ const card = (state = {}, action) => {
 
 
 const deck = (state = {}, action) => {
-    var newState;
+    var newState, cardIndex;
 
     switch (action.type) {
         case 'UPDATE_CARD':
@@ -20,7 +23,7 @@ const deck = (state = {}, action) => {
         case 'REMOVE_CARD':
             newState = Object.assign({}, state);
             newState.cards = newState.cards.slice();
-            var cardIndex = newState.cards.findIndex(c => c.id === action.cardId);
+            cardIndex = newState.cards.findIndex(c => c.id === action.cardId);
             newState.cards.splice(
                 cardIndex,
                 1,
@@ -28,16 +31,29 @@ const deck = (state = {}, action) => {
             );
             return newState;
 
-        case 'CARD_ADDED':
+        case 'ADD_CARD':
             newState = Object.assign({}, state);
             newState.cards = newState.cards.slice();
+            newState.cards.push(Object.assign({}, action.card, {
+                isUpdating: true,
+                id: (tempId++).toFixed(0)
+            }));
+            return newState;
+
+        case 'CARD_ADDED':
+            newState = Object.assign({}, state);
+            newState.cards = newState.cards.filter(c => (
+                !(c.isUpdating &&
+                  c.front === action.card.front &&
+                  c.back === action.card.back)
+            ));
             newState.cards.push(action.card);
             return newState;
 
         case 'CARD_REMOVED':
             newState = Object.assign({}, state);
             newState.cards = newState.cards.slice();
-            var cardIndex = newState.cards.findIndex(c => c.id === action.cardId);
+            cardIndex = newState.cards.findIndex(c => c.id === action.cardId);
             newState.cards.splice(
                 cardIndex,
                 1

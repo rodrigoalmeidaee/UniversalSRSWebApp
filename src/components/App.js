@@ -5,6 +5,7 @@ import logo from '../logo.svg';
 import './App.css';
 import CardsList from './CardsList';
 import DecksList from './DecksList';
+import StudyApp from './StudyApp';
 
 
 class App extends Component {
@@ -18,7 +19,8 @@ class App extends Component {
         <Router>
           <div>
             <Route exact path="/" component={DecksList} />
-            <Route path="/decks/:deckId" component={CardsList} />
+            <Route exact path="/decks/:deckId/study" component={StudyApp} />
+            <Route exact path="/decks/:deckId" component={CardsList} />
           </div>
         </Router>
       </div>

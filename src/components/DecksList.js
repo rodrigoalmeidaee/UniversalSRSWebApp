@@ -64,7 +64,7 @@ class Deck extends Component {
         </span>
         <hr />
         <div className="Deck-actions">
-          <div className="Deck-action">
+          <div className="Deck-action" onClick={() => this.onStudyClicked()}>
             Study
           </div>
           <div className="Deck-action" onClick={() => this.onDeckClicked()}>
@@ -75,7 +75,12 @@ class Deck extends Component {
     );
   }
 
-  onDeckClicked(deck) {
+  onStudyClicked() {
+    const { history } = this.context.router;
+    history.push('/decks/' + this.props.deck.id + '/study');
+  }
+
+  onDeckClicked() {
     const { history } = this.context.router;
     history.push('/decks/' + this.props.deck.id);
   }

@@ -5,9 +5,18 @@ import { fetchDeck, submitCardUpdate, submitCard, submitCardRemoval } from '../a
 
 import '../../node_modules/flag-icon-css/css/flag-icon.css';
 import './CardsList.css';
+import CardViewModel from './CardViewModel';
 
+
+const NO_IMAGE_URI = 'https://blog.stylingandroid.com/wp-content/themes/lontano-pro/images/no-image-slide.png';
+var globalIdCounter = 0;
 
 class CardsList extends Component {
+
+  constructor() {
+    super();
+    this.state = {newCards: []};
+  }
 
   componentWillMount() {
     this.props.fetchDeck(this.deckId());
@@ -15,6 +24,32 @@ class CardsList extends Component {
 
   deckId() {
     return this.props.match.params.deckId;
+  }
+
+  beginCreateCard() {
+    var cid = (++globalIdCounter).toFixed(0);
+    this.setState({
+      newCards: this.state.newCards.concat([{id: cid}])
+    });
+  }
+
+  abortCreateCard(refid) {
+    this.setState({newCards: this.state.newCards.filter(c => c.id !== refid)});
+  }
+
+  endCreateCard(refid, card) {
+    var deck = this.props.deck;
+    this.props.createCard(deck.id, card);
+    this.setState({newCards: this.state.newCards.filter(c => c.id !== refid)});
+  }
+
+  beginAddMondlyCards() {
+    var result = prompt('Please paste JSON here');
+    if (result) {
+      result = JSON.parse(result);
+      result.forEach(c => {c.id = (++globalIdCounter).toFixed(0);});
+      this.setState({newCards: this.state.newCards.concat(result)})
+    }
   }
 
   render() {
@@ -41,9 +76,23 @@ class CardsList extends Component {
               updateCard={(cardId, updates) => this.props.updateCard(deck.id, cardId, updates)}
               removeCard={(cardId) => this.props.removeCard(deck.id, cardId) } />)}
           <hr />
-          <NewCard
-                template={{}}
-                onChangesPersisted={card => this.props.createCard(deck.id, card)} />
+          {
+            this.state.newCards.map(newCard => (
+              <NewCard
+                  key={newCard.id}
+                  template={newCard}
+                  onChangesPersisted={this.endCreateCard.bind(this, newCard.id)}
+                  onChangesVoided={this.abortCreateCard.bind(this, newCard.id)} />
+            ))
+          }
+          <div>
+            <button type="button" onClick={this.beginCreateCard.bind(this)}>
+              Add card
+            </button>
+            <button type="button" onClick={this.beginAddMondlyCards.bind(this)}>
+              Add cards from Mondly
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -83,8 +132,7 @@ class Card extends Component {
   }
 
   render() {
-    var card = this.props.card;
-    var NO_IMAGE_URI = 'https://blog.stylingandroid.com/wp-content/themes/lontano-pro/images/no-image-slide.png';
+    var card = new CardViewModel(this.props.card);
 
     if (this.state.editing) {
 
@@ -101,28 +149,30 @@ class Card extends Component {
       }
 
       return (
-        <div className={`Card ${card.isUpdating ? "isUpdating" : ""}`}>
-          <div className="Card-image-and-sound"
-               style={stylez}
-               onClick={this.maybePlayAudio.bind(this)}>
+        <div className={`Card ${card.isUpdating ? "isUpdating" : ""} ${card.reverse ? "reverse" : ""}`}
+             onDoubleClick={this.beginEdit.bind(this)}>
+          { card.image_uri ?
+            <div className="Card-meta">
+              <div className="Card-image-and-sound"
+                   style={stylez}>
+              </div>
+            </div>
+            : null }
+          <div className="Card-body">
+            <div className="Card-front">
+              {card.renderFrontText()}
+            </div>
+            <div className="Card-back">
+              {card.renderBackText()}
+            </div>
             {
-              card.sound_uri ?
-
-              <audio ref={(audioDom) => {this.audioDom = audioDom;}}>
-                <source src={card.sound_uri} />
-              </audio>
-
+              card.hasNotes()
+              ?
+                <div className="Card-notes">
+                  {card.renderNotes()}
+                </div>
               : null
             }
-          </div>
-          <div className="Card-front">
-            <pre onDoubleClick={() => this.beginEdit()}>{card.front}</pre>
-          </div>
-          <div className="Card-direction">
-            {card.reverse ? '⇠' : '⇢'}
-          </div>
-          <div className="Card-back">
-            <pre onDoubleClick={() => this.beginEdit()}>{card.back}</pre>
           </div>
         </div>
       )
@@ -169,6 +219,12 @@ class NewCard extends Component {
     this.setState({card: Object.assign({}, this.state.card, {reverse: evt.target.checked})});
   }
 
+  maybePlayAudio(event) {
+    if (this.audioDom) {
+      this.audioDom.play();
+    }
+  }
+
   voidChanges() {
     if (this.props.onChangesVoided) {
       this.props.onChangesVoided();
@@ -198,17 +254,53 @@ class NewCard extends Component {
     var void0 = 'javascript';
     void0 += ':void(0)';
 
+    var stylez = {backgroundImage: `url(${card.image_uri || NO_IMAGE_URI})` };
+    if (card.sound_uri) {
+      stylez['cursor'] = 'pointer';
+    }
+
+    var autoGrow = function(event) {
+      var element = event.target;
+      element.style.height = "5px";
+      element.style.height = (element.scrollHeight) + "px";
+    }
+
     return (
-      <div className="NewCardContainer">
-        <div className="Card">
-          <div className="Card-front">
-            <textarea onChange={this.onCardFrontEdited.bind(this)} value={card.front} />
-          </div>
-          <div className="Card-back">
-            <textarea onChange={this.onCardBackEdited.bind(this)} value={card.back} />
+      <div className="Card isNew">
+        <div className="Card-meta">
+          <div className="Card-image-and-sound"
+               style={stylez}
+               onClick={this.maybePlayAudio.bind(this)}>
+            {
+              card.sound_uri ?
+
+              <audio ref={(audioDom) => {this.audioDom = audioDom;}}>
+                <source src={card.sound_uri} />
+              </audio>
+
+              : null
+            }
           </div>
         </div>
-        <div className="CardMetadata">
+        <div className="Card-body">
+          <div className="Card-front">
+            <textarea onChange={this.onCardFrontEdited.bind(this)}
+                      value={card.front}
+                      onKeyUp={autoGrow}
+                      ref={target => target && autoGrow({target: target})} />
+          </div>
+          <div className="Card-back">
+            <textarea onChange={this.onCardBackEdited.bind(this)}
+                      value={card.back}
+                      onKeyUp={autoGrow}
+                      ref={target => target && autoGrow({target: target})} />
+          </div>
+          <div>
+            <label>
+              Reverse?
+            </label>
+            <input onChange={this.onReverseEdited.bind(this)} type="checkbox" checked={card.reverse} />
+          </div>
           <div>
             <label>
               Sound URI
@@ -221,24 +313,18 @@ class NewCard extends Component {
             </label>
             <input onChange={this.onImageUriEdited.bind(this)} value={card.image_uri} tabIndex="-1" />
           </div>
-          <div>
-            <label>
-              Reverse translation?
-            </label>
-            <input onChange={this.onReverseEdited.bind(this)} type="checkbox" checked={card.reverse} />
+          <div className="Card-actions">
+            <a href={void0} onClick={() => this.persistChanges()}>
+              Save
+            </a>
+            <a href={void0} onClick={() => this.voidChanges()} tabIndex="-1">
+              Cancel
+            </a>
+            { this.props.onRemovalRequested ?
+              <a href={void0} onClick={() => this.removalRequested()} tabIndex="-1">
+                Remove
+              </a> : null }
           </div>
-        </div>
-        <div className="Card-actions">
-          <a href={void0} onClick={() => this.persistChanges()}>
-            Save
-          </a>
-          <a href={void0} onClick={() => this.voidChanges()} tabIndex="-1">
-            Cancel
-          </a>
-          { this.props.onRemovalRequested ?
-            <a href={void0} onClick={() => this.removalRequested()} tabIndex="-1">
-              Remove
-            </a> : null }
         </div>
       </div>
     );

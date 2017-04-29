@@ -88,6 +88,40 @@ export function cardRemoved(deckId, cardId) {
 }
 
 
+export function requestStudySession(deckId) {
+    return {
+        type: 'REQUEST_STUDY_SESSION',
+        deckId: deckId
+    };
+}
+
+
+export function receiveStudySession(studySession) {
+    return {
+        type: 'RECEIVE_STUDY_SESSION',
+        studySession: studySession
+    }
+}
+
+
+export function syncStarted(sessionId, answers) {
+    return {
+        type: 'SYNC_STARTED',
+        sessionId: sessionId,
+        answers: answers
+    };
+}
+
+
+export function syncSucceeded(sessionId, answers) {
+    return {
+        type: 'SYNC_SUCCEEDED',
+        sessionId: sessionId,
+        answers: answers
+    }
+}
+
+
 const raiseForStatus = response => {
     if (response.status > 299) {
         return Promise.reject(`Expected HTTP 2xx, but got ${response.status}`);
@@ -185,6 +219,35 @@ export function submitCardRemoval(deckId, cardId) {
                 console.log(response);
                 dispatch(cardRemoved(deckId, cardId));
             }
+        );
+    }
+}
+
+
+export function fetchStudySession(deckId) {
+    return function(dispatch) {
+        dispatch(requestStudySession(deckId));
+
+        return fetch(
+            process.env.REACT_APP_API_HOST + '/decks/' + deckId + '/study'
+        ).then(raiseForStatus).then(
+            response => response.json()
+        ).then(
+            json => dispatch(receiveStudySession(json))
+        );
+    }
+}
+
+
+export function submitAnswers(sessionId, answers) {
+    return function(dispatch) {
+        dispatch(syncStarted(sessionId, answers));
+
+        fetch(
+            process.env.REACT_APP_API_HOST + '/answers?session_id=' + sessionId,
+            {method: 'POST', body: JSON.stringify(answers)}
+        ).then(raiseForStatus).then(
+            response => dispatch(syncSucceeded(sessionId, answers))
         );
     }
 }
