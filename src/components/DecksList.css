@@ -21,6 +21,21 @@
     margin-bottom: 8px;
 }
 
+.Deck-cardCount span + span:before {
+    content: '|';
+    display: inline-block;
+    margin: 0 10px;
+    color: #ccc ;
+}
+
+.Deck-cardCount .due {
+    color: #999;
+}
+
+.Deck-cardCount .new {
+    color: #999;
+}
+
 .Deck .flag-icon {
     margin-right: 8px;
     border: #ddd solid 1px;

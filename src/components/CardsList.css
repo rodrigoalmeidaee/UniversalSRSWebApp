@@ -56,6 +56,11 @@
     border-left: #3ccfcf solid 5px;
 }
 
+.Card.twoway {
+    border-left: #ffcd1f solid 5px;
+}
+
+
 .Card .Card-body {
     flex: 1;
     font-size: 14px;

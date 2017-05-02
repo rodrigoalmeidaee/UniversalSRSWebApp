@@ -56,7 +56,13 @@ class Deck extends Component {
     return (
       <div className="Deck">
         <span className="Deck-cardCount">
-          {this.props.deck.card_count} cards
+          <span className="count">
+            {this.props.deck.card_count} cards
+          </span><span className="due" style={{display: this.props.deck.due_card_count ? '' : 'none'}}>
+            {this.props.deck.due_card_count} due
+          </span><span className="new" style={{display: this.props.deck.new_card_count ? '' : 'none'}}>
+            {this.props.deck.new_card_count} new
+          </span>
         </span>
         <span className="Deck-title">
           <span className={ `flag-icon flag-icon-${this.props.deck.language}` } />

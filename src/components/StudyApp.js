@@ -23,6 +23,26 @@ const NEW_CARDS_BLOCK_SIZE = 10;
 const OLD_CARDS_BLOCK_SIZE = 20;
 
 
+const shuffle = function(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
+
 class StudyApp extends Component {
   constructor() {
     super();
@@ -55,7 +75,7 @@ class StudyApp extends Component {
   }
 
   handleInput(e) {
-    var submitting = this.state.flashAnswer && this.state.flashAnswer !== "maybeWrong";
+    var submitting = this.state.flashAnswer && this.state.flashAnswer.indexOf("maybe") != 0;
     var canAcceptText = !this.state.cardFlipped && !submitting;
     var canAcceptArrows = !submitting && (this.state.cardFlipped || e.target.value === "");
 
@@ -67,7 +87,11 @@ class StudyApp extends Component {
           this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
         );
         if (card.acceptableAnswers().find(a => a.toLowerCase() === e.target.value.toLowerCase())) {
-          this.handleScenario('right');
+          if (card.is_new) {
+            this.setState({'flashAnswer': 'maybeRight'});
+          } else {
+            this.handleScenario('right');
+          }
         } else {
           this.setState({'flashAnswer': 'maybeWrong'});
         }
@@ -137,32 +161,29 @@ class StudyApp extends Component {
 
   moveIndex(studyOrder, studyIndex, cardStack) {
     if (studyIndex === studyOrder.length - 1) {
-      var newStudyOrder = studyOrder;
-      var cardsAdded = 0;
+      var cardsAdded = [];
 
-      for (var i = 0; i < cardStack.length && cardsAdded < OLD_CARDS_BLOCK_SIZE; ++i) {
+      for (var i = 0; i < cardStack.length && cardsAdded.length < OLD_CARDS_BLOCK_SIZE; ++i) {
         if (!cardStack[i].is_new && !cardStack[i]._finished) {
-          newStudyOrder = newStudyOrder.concat([i]);
-          ++cardsAdded;
+          cardsAdded.push(i);
         }
       }
 
-      if (!cardsAdded) {
-        for (i = 0; i < cardStack.length && cardsAdded < NEW_CARDS_BLOCK_SIZE; ++i) {
+      if (!cardsAdded.length) {
+        for (i = 0; i < cardStack.length && cardsAdded.length < NEW_CARDS_BLOCK_SIZE; ++i) {
           if (cardStack[i].is_new && !cardStack[i]._finished) {
-            newStudyOrder = newStudyOrder.concat([i]);
-            ++cardsAdded;
+            cardsAdded.push(i);
           }
         }
       }
 
-      if (!cardsAdded) {
+      if (!cardsAdded.length) {
         this.setState({
           state: 'studyFinished'
         });
       } else {
         this.setState({
-          studyOrder: newStudyOrder,
+          studyOrder: studyOrder.concat(shuffle(cardsAdded)),
           studyIndex: studyIndex + 1
         });
       }
@@ -172,6 +193,57 @@ class StudyApp extends Component {
       });
     }
     this.setState({cardFlipped: false, userEnteredText: ''});
+  }
+
+  getStudySessionProgress() {
+    let expectedNumberOfAnswers = 0;
+    let answersGiven = 0;
+    let newCardCount = 0;
+    let newCardFinishedCount = 0;
+    let reviewedCardCount = 0;
+    let reviewedCardFinishedCount = 0;
+    let recalledCorrectlyCardCount = 0;
+
+    this.state.cardStack.forEach(card => {
+      if (card.is_new) {
+        expectedNumberOfAnswers += 3;
+        newCardCount += 1;
+        if (card._finished) {
+          answersGiven += 3;
+          newCardFinishedCount += 1;
+        } else {
+          answersGiven += (card._bounces || 0);
+        }
+      }
+      else {
+        expectedNumberOfAnswers += 1;
+        reviewedCardCount += 1;
+        if (card._finished) {
+          answersGiven += 1;
+          reviewedCardFinishedCount += 1;
+          if (!card._wrong) {
+            recalledCorrectlyCardCount += 1;
+          }
+        }
+      }
+    });
+
+    return {
+      progress: {
+        toDo: expectedNumberOfAnswers,
+        done: answersGiven,
+        percent: 100 * (answersGiven / expectedNumberOfAnswers)
+      },
+      newCards: {
+        toDo: newCardCount,
+        done: newCardFinishedCount
+      },
+      oldCards: {
+        toDo: reviewedCardCount,
+        done: reviewedCardFinishedCount,
+        recallRate: recalledCorrectlyCardCount / reviewedCardFinishedCount
+      }
+    };
   }
 
   render() {
@@ -221,17 +293,24 @@ class StudyApp extends Component {
       );
       var cards = this.state.cardStack;
       var cardFlipped = this.state.cardFlipped;
-      var disableButtons = this.state.flashAnswer && this.state.flashAnswer !== 'maybeWrong';
+      var disableButtons = this.state.flashAnswer && this.state.flashAnswer.indexOf('maybe') != 0;
       var autoGrow = function(event) {
         var element = event.target;
         element.style.height = "5px";
         element.style.height = (element.scrollHeight) + "px";
       }
+      var progress = this.getStudySessionProgress();
 
       return (
         <div className="StudyApp">
-          <h3>
-            {deck.title} • card {this.state.studyOrder[this.state.studyIndex] + 1} / {cards.length}
+          <h3 className="StudyHeader">
+            {deck.title}
+            <small>
+              new: {progress.newCards.done} / {progress.newCards.toDo},
+              reviews: {progress.oldCards.done} / {progress.oldCards.toDo}
+              ({(100 * progress.oldCards.recallRate).toFixed(0).replace(/NaN/, '-')}% correct),
+              session: {progress.progress.percent.toFixed(0)}% complete
+            </small>
           </h3>
           <div className="StudyCard">
             <div className={`Card-front ${this.state.flashAnswer || ''}`}>
@@ -277,20 +356,17 @@ class StudyApp extends Component {
         </div>
       );
     } else if (this.state.state === 'studyFinished') {
-      let newCardCount = this.state.cardStack.filter(c => c._bounces >= 3).length;
-      let reviewedCardCount = this.state.cardStack.filter(c => c._bounces === undefined && !c.is_new).length;
-      let rememberedCardCount = this.state.cardStack.filter(c => c._bounces === undefined && !c.is_new && !c._wrong).length;
-      let recallRate = rememberedCardCount / reviewedCardCount;
+      let progress = this.getStudySessionProgress();
 
       return (
         <div className="StudyApp">
           <h3>{deck.title}</h3>
           <div className="StudySessionResult">
-            <span className="number">{newCardCount}</span>
+            <span className="number">{progress.newCards.done}</span>
             <span className="term">new cards</span>
-            <span className="number">{reviewedCardCount}</span>
+            <span className="number">{progress.oldCards.done}</span>
             <span className="term">old cards</span>
-            <span className="number">{(recallRate * 100).toFixed(0)}%</span>
+            <span className="number">{(progress.oldCards.recallRate * 100).toFixed(0)}%</span>
             <span className="term">recall rate</span>
           </div>
           <div className="StudyActions">

@@ -1,13 +1,6 @@
 import React from 'react';
 
 
-var rndKeyGen = 1;
-
-function rndKey() {
-  return ++rndKeyGen;
-}
-
-
 class CardViewModel {
 
     constructor(card) {
@@ -67,7 +60,7 @@ class CardViewModel {
         return (
           <div className="card-text-block">
             {
-              lines.map(line => this._renderLine(line))
+              lines.map((line, idx) => this._renderLine(line, idx))
             }
           </div>
         );
@@ -90,9 +83,9 @@ class CardViewModel {
       }
     }
 
-    _renderLine(text) {
+    _renderLine(text, lidx) {
       if (text === "Mnemonic:") {
-        return <div className="card-notes-header" key={rndKey()}>{text}</div>;
+        return <div className="card-notes-header" key={lidx + '.' + text}>{text}</div>;
       }
       if (text.indexOf("[sound:") >= 0) {
         var capturedDom;
@@ -100,7 +93,7 @@ class CardViewModel {
         soundUri = soundUri.substring(0, soundUri.length - 1);
 
         return (
-          <div className='text-line' key={rndKey()}>
+          <div className='text-line' key={lidx + '.' + text}>
             <span className="sounded-text" onClick={() => capturedDom && capturedDom.play()}>
               {this._renderLine(text.replace(/\s*\[sound:[^\]]*\]/, ""))}
               <audio ref={audioDom => {capturedDom = audioDom;}}>
@@ -112,13 +105,13 @@ class CardViewModel {
       } else {
         var tokenizedString = text.split(/(\*.*?\*)/);
         return (
-          <div className='text-line' key={rndKey()}>
+          <div className='text-line' key={lidx + '.' + text}>
             {
-              tokenizedString.map(token => {
+              tokenizedString.map((token, idx) => {
                 if (token.substring(0, 1) === '*') {
-                  return <em>{token.substring(1, token.length - 1)}</em>;
+                  return <em key={idx + token}>{token.substring(1, token.length - 1)}</em>;
                 }
-                return token;
+                return <span key={idx + token}>{token}</span>;
               })
             }
           </div>

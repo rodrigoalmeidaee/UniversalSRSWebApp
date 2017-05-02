@@ -40,7 +40,7 @@
     transition: background-color 0.3s ease;
 }
 
-.StudyCard .Card-front.right {
+.StudyCard .Card-front.right, .StudyCard .Card-front.maybeRight {
     background: rgb(152, 223, 138);
     transition: background-color 0.3s ease;
 }
@@ -125,4 +125,10 @@
 
 .StudyDueDistribution svg g.x g.tick text {
     transform: translate(17.5px,0);
+}
+
+.StudyHeader small {
+    display: block;
+    text-transform: none;
+    font-weight: 100;
 }

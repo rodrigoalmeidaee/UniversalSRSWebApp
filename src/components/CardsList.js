@@ -11,6 +11,22 @@ import CardViewModel from './CardViewModel';
 const NO_IMAGE_URI = 'https://blog.stylingandroid.com/wp-content/themes/lontano-pro/images/no-image-slide.png';
 var globalIdCounter = 0;
 
+
+const _isTwoWayTranslation = (a, b) => {
+  if (!a || !b) {
+    return false;
+  }
+
+  a = new CardViewModel(a);
+  b = new CardViewModel(b);
+
+  var aBack = a.splitNotes()[0];
+  var bBack = b.splitNotes()[0];
+
+  return aBack === b.front && a.front === bBack && a.reverse !== b.reverse;
+}
+
+
 class CardsList extends Component {
 
   constructor() {
@@ -70,11 +86,22 @@ class CardsList extends Component {
           </small>
         </h3>
         <div className="CardsList">
-          {deck.cards.map(card => <Card
+          {
+            deck.cards.filter(card => (
+              deck.cards[0] === card ||
+              this.state[deck.cards[deck.cards.indexOf(card) - 1].id + '_editing'] ||
+              !_isTwoWayTranslation(card, deck.cards[deck.cards.indexOf(card) - 1])
+            )).map((card) => <Card
               card={card}
               key={card.id}
               updateCard={(cardId, updates) => this.props.updateCard(deck.id, cardId, updates)}
-              removeCard={(cardId) => this.props.removeCard(deck.id, cardId) } />)}
+              removeCard={(cardId) => this.props.removeCard(deck.id, cardId) }
+              onEditStateChanged={editing => this.setState({[card.id + '_editing']: editing})}
+              isTwoWayTranslation={
+                _isTwoWayTranslation(card, deck.cards[deck.cards.indexOf(card) + 1])
+              } />
+            )
+          }
           <hr />
           {
             this.state.newCards.map(newCard => (
@@ -109,6 +136,12 @@ class Card extends Component {
 
   beginEdit() {
     this.setState({editing: true});
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    if (nextState.editing !== this.state.editing && this.props.onEditStateChanged) {
+      this.props.onEditStateChanged(nextState.editing);
+    }
   }
 
   onChangesPersisted(changes) {
@@ -148,8 +181,15 @@ class Card extends Component {
         stylez['cursor'] = 'pointer';
       }
 
+      var translationDirectionClass = '';
+      if (this.props.isTwoWayTranslation) {
+        translationDirectionClass = 'twoway';
+      } else if (card.reverse) {
+        translationDirectionClass = 'reverse';
+      }
+
       return (
-        <div className={`Card ${card.isUpdating ? "isUpdating" : ""} ${card.reverse ? "reverse" : ""}`}
+        <div className={`Card ${card.isUpdating ? "isUpdating" : ""} ${translationDirectionClass}`}
              onDoubleClick={this.beginEdit.bind(this)}>
           { card.image_uri ?
             <div className="Card-meta">
