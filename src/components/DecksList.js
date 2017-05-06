@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types'
 
-import { fetchDecksIfNeeded } from '../actions'
+import { fetchDecks } from '../actions'
 
 import './DecksList.css';
 import '../../node_modules/flag-icon-css/css/flag-icon.css';
@@ -11,9 +11,7 @@ import '../../node_modules/flag-icon-css/css/flag-icon.css';
 class DecksList extends Component {
 
   componentWillMount() {
-    if (!this.props.isFetching && !this.props.decks) {
-      this.props.fetchDecksIfNeeded();
-    }
+    this.props.fetchDecks();
   }
 
   render() {
@@ -102,7 +100,7 @@ DecksList = connect(
   },
   function mapDispatchToProps(dispatch) {
     return {
-      fetchDecksIfNeeded: () => dispatch(fetchDecksIfNeeded())
+      fetchDecks: () => dispatch(fetchDecks())
     }
   }
 )(DecksList)

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import React, { Component } from 'react';
-import {BarChart} from 'react-easy-chart';
+import {BarChart, LineChart, Legend} from 'react-easy-chart';
 
 import { fetchStudySession, submitAnswers, fetchDeck } from '../actions'
 
@@ -41,6 +41,104 @@ const shuffle = function(array) {
 
   return array;
 }
+
+
+const normalizeGraphs0 = function(graphs, ...seriesNames) {
+  var series = seriesNames.map(name => {
+    var graph = graphs.find(g => g.name === name);
+    if (!graph) {
+      graph = {data: []};
+    }
+    return graph.data.slice();
+  });
+
+  var keys = [];
+  series.forEach(s => {
+    s.forEach(xy => {
+      if (keys.indexOf(xy.x) == -1) {
+        keys.push(xy.x);
+      }
+    });
+  });
+
+  series.forEach(s => {
+    keys.forEach(key => {
+      if (s.findIndex(xy => xy.x === key) == -1) {
+        s.push({x: key, y: 0});
+      }
+    });
+  });
+
+  series.forEach(s => {
+    s.sort((a, b) => {
+      if (a.x > b.x) {
+        return 1;
+      } else if (a.x < b.x) {
+        return -1;
+      }
+      return 0;
+    });
+  });
+
+  return series;
+};
+
+
+
+const normalizeGraphsSplit = function(graphs, ...seriesNames) {
+  var series = seriesNames.map(name => {
+    var graph = graphs.find(g => g.name === name);
+    if (!graph) {
+      graph = {data: []};
+    }
+    return graph.data.slice();
+  });
+
+  var keys = [];
+  series.forEach(s => {
+    s.forEach(xy => {
+      if (keys.indexOf(xy.x) == -1) {
+        keys.push(xy.x);
+      }
+    });
+  });
+
+  series.forEach(s => {
+    keys.forEach(key => {
+      if (s.findIndex(xy => xy.x === key) == -1) {
+        s.push({x: key, y: null});
+      }
+    });
+  });
+
+  series.forEach(s => {
+    s.sort((a, b) => {
+      if (a.x > b.x) {
+        return 1;
+      } else if (a.x < b.x) {
+        return -1;
+      }
+      return 0;
+    });
+  });
+
+  return series.map(s => {
+    var collectedSeries = [];
+    while (s.findIndex(xy => xy.y === null) >= 0) {
+      var index = s.findIndex(xy => xy.y === null);
+      if (index > 0) {
+        collectedSeries.push(s.splice(0, index));
+      }
+      while (s.length && s[0].y === null) {
+        s.splice(0, 1);
+      }
+    }
+    if (s.length) {
+      collectedSeries.push(s);
+    }
+    return collectedSeries;
+  });
+};
 
 
 class StudyApp extends Component {
@@ -119,8 +217,16 @@ class StudyApp extends Component {
   }
 
   handleScenario(scenario) {
-    this.setState({'flashAnswer': scenario, 'cardFlipped': true});
-    setTimeout(this._endHandleScenario.bind(this, scenario), 1000);
+    var timeoutId = setTimeout(this._endHandleScenario.bind(this, scenario), 1000);
+
+    this.setState({
+      'flashAnswer': scenario,
+      'cardFlipped': true,
+      'cancelAutomaticMoveToNextCard': function() {
+        clearTimeout(timeoutId)
+      },
+      'moveToNextCard': this._endHandleScenario.bind(this, scenario)
+    });
   }
 
   _endHandleScenario(scenario) {
@@ -192,7 +298,45 @@ class StudyApp extends Component {
         studyIndex: studyIndex + 1
       });
     }
-    this.setState({cardFlipped: false, userEnteredText: ''});
+    this.setState({
+      cardFlipped: false,
+      userEnteredText: '',
+      cancelAutomaticMoveToNextCard: null,
+      moveToNextCard: null
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.studyIndex !== this.state.studyIndex) {
+      var card = new CardViewModel(
+        this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
+      );
+      if (!card.reverse && document.querySelectorAll('audio').length === 1) {
+        document.querySelector('audio').play();
+      }
+    }
+    else if (this.state.cardFlipped && !prevState.cardFlipped) {
+      var card = new CardViewModel(
+        this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
+      );
+      if (card.reverse && document.querySelectorAll('audio').length === 1) {
+        var audioDom = document.querySelector('audio');
+        if (this.state.moveToNextCard) {
+          var throttle = function(callable, delayMs) {
+            return function() {
+              console.log('eventListenerCallback');
+              setTimeout(callable, delayMs);
+            };
+          };
+
+          audioDom.addEventListener("ended", throttle(this.state.moveToNextCard, 500), {once: true});
+          this.state.cancelAutomaticMoveToNextCard();
+          audioDom.play();
+        } else {
+          audioDom.play();
+        }
+      }
+    }
   }
 
   getStudySessionProgress() {
@@ -285,6 +429,8 @@ class StudyApp extends Component {
               : null
             }
           </div>
+          {this.reviewsChart()}
+          {this.recallRateChart()}
         </div>
       )
     } else if (this.state.state === 'studying') {
@@ -375,6 +521,104 @@ class StudyApp extends Component {
         </div>
       );
     }
+  }
+
+  reviewsChart() {
+    if (this.props.studySession.graphs.filter(g => (
+      (g.name === 'New Cards' || g.name === 'Reviewed Cards')
+      && g.data.length >= 2
+    )).length == 2) {
+      var [newCardsData, reviewedCardsData] = normalizeGraphs0(
+        this.props.studySession.graphs,
+        'New Cards',
+        'Reviewed Cards'
+      );
+
+      var legend = [
+        {key: 'New Cards', color: COLORS['new']},
+        {key: 'Reviews', color: COLORS['today']},
+      ];
+
+      return (
+        <div>
+          <h4>Cards studied per day</h4>
+          <Legend
+            data={legend}
+            horizontal
+            dataId={'key'}
+            config={legend} />
+          <LineChart
+            xType={'text'}
+            width={500}
+            height={200}
+            axes
+            grid
+            data={[newCardsData, reviewedCardsData]}
+            lineColors={[COLORS['new'], COLORS['today']]}
+            yDomainRange={[0, Math.max(...(
+              newCardsData.map(dp => dp.y).concat(reviewedCardsData.map(dp => dp.y))
+            ))]}
+          />
+        </div>
+      );
+    }
+
+    return null;
+  }
+
+  recallRateChart() {
+    if (this.props.studySession.graphs.filter(g => (
+      (g.name.indexOf('Recall Rate') >= 0)
+      && g.data.length >= 2
+    )).length >= 1) {
+      var [all, baby, young, adult, old] = normalizeGraphsSplit(
+        this.props.studySession.graphs,
+        'Recall Rate/All Cards',
+        'Recall Rate/Very Imature Cards (SRS Level 0-2)',
+        'Recall Rate/Imature Cards (SRS Level 3-4)',
+        'Recall Rate/Almost Mature Cards (SRS Level 5-7)',
+        'Recall Rate/Mature Cards (SRS Level 8+)'
+      );
+      var lineColors = (
+        all.map(_ => '#000000')
+        .concat(baby.map(_ => COLORS['now']))
+        .concat(young.map(_ => COLORS['tomorrow']))
+        .concat(adult.map(_ => COLORS['4d-1w']))
+        .concat(old.map(_ => COLORS['1m+']))
+      )
+
+      var legend = [
+        {key: 'All', color: '#000000'},
+        {key: 'Very Imature (SRS 0-2)', color: COLORS['now']},
+        {key: 'Imature (SRS 3-4)', color: COLORS['tomorrow']},
+        {key: 'Almost Mature (SRS 5-7)', color: COLORS['4d-1w']},
+        {key: 'Mature (SRS 8+)', color: COLORS['1m+']},
+      ];
+
+      return (
+        <div>
+          <h4>Recall rate</h4>
+          <Legend
+            data={legend}
+            horizontal
+            dataId={'key'}
+            config={legend} />
+          <LineChart
+            xType={'text'}
+            width={500}
+            height={200}
+            axes
+            grid
+            data={all.concat(baby).concat(young).concat(adult).concat(old).map(s => {
+              return s.map(xy => ({x: xy.x, y: xy.y * 100}));
+            })}
+            lineColors={lineColors}
+          />
+        </div>
+      );
+    }
+
+    return null;
   }
 }
 

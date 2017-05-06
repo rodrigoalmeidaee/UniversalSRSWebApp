@@ -142,17 +142,6 @@ export function fetchDecks() {
 }
 
 
-export function fetchDecksIfNeeded() {
-    return (dispatch, getState) => {
-        if (getState().deckList.decks) {
-            return Promise.resolve();
-        } else {
-            return dispatch(fetchDecks());
-        }
-    };
-}
-
-
 export function fetchDeck(deckId) {
     return function(dispatch) {
         dispatch(requestDeck(deckId));

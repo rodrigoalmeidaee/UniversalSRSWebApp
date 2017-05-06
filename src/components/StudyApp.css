@@ -15,12 +15,13 @@
 
 .StudyCard {
     position: absolute;
-    bottom: 0px;
     background: white;
     left: 0px;
     right: 0px;
-    padding: 0;
+    padding: 0 0 40px 0;
     top: 165px;
+    height: auto;
+    min-height: calc(100% - 205px);
 }
 
 .StudyCard .Card-front {
@@ -131,4 +132,17 @@
     display: block;
     text-transform: none;
     font-weight: 100;
+}
+
+ul.legend {
+    font-size: 9px;
+}
+
+ul.legend .icon {
+    width: 9px !important;
+    height: 9px !important;
+}
+
+ul.legend li.horizontal {
+    line-height: inherit;
 }
