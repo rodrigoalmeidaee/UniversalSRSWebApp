@@ -172,16 +172,24 @@ ul.legend li.horizontal {
     }
 
     .StudyCard .Card-front, .StudyCard .Card-answer, .StudyCard .Card-back {
-        font-size: 17px;
+        font-size: 18px;
         padding: 15px;
     }
 
+    .StudyCard .Card-front {
+        padding-bottom: 25px;
+    }
+
+    .StudyCard .Card-answer {
+        padding-top: 25px;
+    }
+
     .StudyCard .Card-answer textarea {
-        font-size: 17px;
+        font-size: 18px;
     }
 
     .StudyCard .Card-actions button {
-        font-size: 17px;
+        font-size: 18px;
     }
 
     .StudyCard .Card-answer-overlay {

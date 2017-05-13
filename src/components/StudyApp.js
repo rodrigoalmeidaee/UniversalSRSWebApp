@@ -183,7 +183,8 @@ class StudyApp extends Component {
       var card = new CardViewModel(
         this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
       );
-      if (card.acceptableAnswers().find(a => a.toLowerCase() === e.target.value.toLowerCase())) {
+      var comparisonBase = e.target.value.trim();
+      if (card.acceptableAnswers().find(a => a.toLowerCase() === comparisonBase.toLowerCase())) {
         if (card.is_new) {
           this.setState({'flashAnswer': 'maybeRight'});
         } else {
@@ -199,11 +200,27 @@ class StudyApp extends Component {
     var submitting = this.state.flashAnswer && this.state.flashAnswer.indexOf("maybe") != 0;
     var canAcceptText = !this.state.cardFlipped && !submitting;
     var canAcceptArrows = !submitting && (this.state.cardFlipped || e.target.value === "");
-    var isMobile = window.innerHeight <= 768;
+    var doubleEnter = (
+      e.keyCode === 13
+      && this.lastEventKeyCode === 13
+      && (new Date().getTime() - this.lastEventTimestamp) < 1000
+    );
+    var card = new CardViewModel(
+      this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
+    );
+    var isSingleLineAnswer = !card.acceptableAnswers().find(a => a.split("\n").length != 1);
 
-    if (e.keyCode === 13 && !e.shiftKey && !isMobile) {
-      e.preventDefault();
-      this.onFlipRequested(e);
+    this.lastEventKeyCode = e.keyCode;
+    this.lastEventTimestamp = new Date().getTime();
+
+    if (e.keyCode === 13) {
+      console.log("isEnter", isSingleLineAnswer, doubleEnter);
+      if (isSingleLineAnswer || doubleEnter) {
+        e.preventDefault();
+        this.onFlipRequested(e);
+      } else {
+        console.log("else");
+      }
     } else if (e.keyCode === 39 /* rightarrow */) {
       if (canAcceptArrows) {
         this.handleScenario('right');
@@ -471,7 +488,8 @@ class StudyApp extends Component {
             </small>
           </h3>
           <div className="StudyCard">
-            <div className={`Card-front ${this.state.flashAnswer || ''}`}>
+            <div className={`Card-front ${this.state.flashAnswer || ''}`}
+                 onDoubleClick={() => this.onFlipRequested()}>
               {card.renderFrontText()}
             </div>
             <div className="Card-answer">
@@ -482,7 +500,6 @@ class StudyApp extends Component {
               </div>
               <textarea
                      onKeyDown={this.handleInput.bind(this)}
-                     onDoubleClick={this.onFlipRequested.bind(this)}
                      onChange={e => {
                        this.setState({userEnteredText: e.target.value});
                        autoGrow(e);
@@ -506,7 +523,14 @@ class StudyApp extends Component {
             <div className="Card-actions">
               <button type="button" data-scenario="right" onClick={this.handleScenario.bind(this, 'right')} disabled={disableButtons}>
                 ✓
-                <span className="timing">{card.getTimingInfo('right')}</span>
+                <span className="timing">
+                  {card.getTimingInfo('right')}
+                  {
+                    card.is_new ?
+                      <span> <small>({(card._bounces || 0) + 1}/3)</small></span>
+                      : null
+                  }
+                </span>
               </button>
               <button type="button" data-scenario="easy" onClick={this.handleScenario.bind(this, 'easy')} disabled={disableButtons}>
                ✓✓
