@@ -23,6 +23,12 @@
   color: white;
 }
 
+@media(max-height: 768px) {
+  .App-header {
+    display: none;
+  }
+}
+
 .App-intro {
   font-size: large;
 }

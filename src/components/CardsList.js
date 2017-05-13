@@ -59,6 +59,22 @@ class CardsList extends Component {
     this.setState({newCards: this.state.newCards.filter(c => c.id !== refid)});
   }
 
+  duplicateCard(cid) {
+    var cardIndex = this.state.newCards.findIndex(c => c.id === cid);
+    var newCardIndex = cardIndex + 1;
+    var card = this.state.newCards[cardIndex];
+    var newCard = Object.assign({}, card, {
+      front: card.back,
+      back: card.front,
+      reverse: !card.reverse,
+      id: (++globalIdCounter).toFixed(0),
+    });
+
+    var newNewCards = this.state.newCards.slice();
+    newNewCards.splice(newCardIndex, 0, newCard);
+    this.setState({newCards: newNewCards});
+  }
+
   beginAddMondlyCards() {
     var result = prompt('Please paste JSON here');
     if (result) {
@@ -106,10 +122,12 @@ class CardsList extends Component {
           {
             this.state.newCards.map(newCard => (
               <NewCard
+                  isNewCard
                   key={newCard.id}
                   template={newCard}
                   onChangesPersisted={this.endCreateCard.bind(this, newCard.id)}
-                  onChangesVoided={this.abortCreateCard.bind(this, newCard.id)} />
+                  onChangesVoided={this.abortCreateCard.bind(this, newCard.id)}
+                  onDuplicateRequested={this.duplicateCard.bind(this, newCard.id)} />
             ))
           }
           <div>
@@ -265,6 +283,16 @@ class NewCard extends Component {
     }
   }
 
+  reverse() {
+    this.setState({
+      card: Object.assign({}, this.state.card, {
+        front: this.state.card.back,
+        back: this.state.card.front,
+        reverse: !this.state.card.reverse,
+      })
+    });
+  }
+
   voidChanges() {
     if (this.props.onChangesVoided) {
       this.props.onChangesVoided();
@@ -287,6 +315,10 @@ class NewCard extends Component {
     if (window.confirm("Are you sure?")) {
       this.props.onRemovalRequested();
     }
+  }
+
+  duplicateRequested() {
+    this.props.onDuplicateRequested();
   }
 
   render() {
@@ -363,6 +395,14 @@ class NewCard extends Component {
             { this.props.onRemovalRequested ?
               <a href={void0} onClick={() => this.removalRequested()} tabIndex="-1">
                 Remove
+              </a> : null }
+            { this.props.isNewCard ?
+              <a href={void0} onClick={() => this.reverse()} tabIndex="-1">
+                Reverse in place
+              </a> : null }
+            { this.props.isNewCard ?
+              <a href={void0} onClick={() => this.duplicateRequested()} tabIndex="-1">
+                Reverse in new card
               </a> : null }
           </div>
         </div>

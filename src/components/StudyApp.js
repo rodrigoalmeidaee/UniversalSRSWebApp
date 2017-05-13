@@ -172,28 +172,38 @@ class StudyApp extends Component {
     this.moveIndex([], -1, cardStack);
   }
 
-  handleInput(e) {
+  onFlipRequested(e) {
+    e = e || {target: this._cardAnswerDom};
     var submitting = this.state.flashAnswer && this.state.flashAnswer.indexOf("maybe") != 0;
     var canAcceptText = !this.state.cardFlipped && !submitting;
     var canAcceptArrows = !submitting && (this.state.cardFlipped || e.target.value === "");
 
-    if (e.keyCode === 13 && !e.shiftKey) {
-      e.preventDefault();
-      if (canAcceptText) {
-        this.setState({cardFlipped: true});
-        var card = new CardViewModel(
-          this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
-        );
-        if (card.acceptableAnswers().find(a => a.toLowerCase() === e.target.value.toLowerCase())) {
-          if (card.is_new) {
-            this.setState({'flashAnswer': 'maybeRight'});
-          } else {
-            this.handleScenario('right');
-          }
+    if (canAcceptText) {
+      this.setState({cardFlipped: true});
+      var card = new CardViewModel(
+        this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
+      );
+      if (card.acceptableAnswers().find(a => a.toLowerCase() === e.target.value.toLowerCase())) {
+        if (card.is_new) {
+          this.setState({'flashAnswer': 'maybeRight'});
         } else {
-          this.setState({'flashAnswer': 'maybeWrong'});
+          this.handleScenario('right');
         }
+      } else {
+        this.setState({'flashAnswer': 'maybeWrong'});
       }
+    }
+  }
+
+  handleInput(e) {
+    var submitting = this.state.flashAnswer && this.state.flashAnswer.indexOf("maybe") != 0;
+    var canAcceptText = !this.state.cardFlipped && !submitting;
+    var canAcceptArrows = !submitting && (this.state.cardFlipped || e.target.value === "");
+    var isMobile = window.innerHeight <= 768;
+
+    if (e.keyCode === 13 && !e.shiftKey && !isMobile) {
+      e.preventDefault();
+      this.onFlipRequested(e);
     } else if (e.keyCode === 39 /* rightarrow */) {
       if (canAcceptArrows) {
         this.handleScenario('right');
@@ -446,6 +456,8 @@ class StudyApp extends Component {
         element.style.height = (element.scrollHeight) + "px";
       }
       var progress = this.getStudySessionProgress();
+      var frontLanguage = card.reverse ? 'us' : deck.language;
+      var backLanguage = !card.reverse ? 'us' : deck.language;
 
       return (
         <div className="StudyApp">
@@ -463,8 +475,14 @@ class StudyApp extends Component {
               {card.renderFrontText()}
             </div>
             <div className="Card-answer">
+              <div className="Card-answer-overlay">
+                <span className={ `flag-icon flag-icon-${frontLanguage}` } />
+                &nbsp;→&nbsp;
+                <span className={ `flag-icon flag-icon-${backLanguage}` } />
+              </div>
               <textarea
                      onKeyDown={this.handleInput.bind(this)}
+                     onDoubleClick={this.onFlipRequested.bind(this)}
                      onChange={e => {
                        this.setState({userEnteredText: e.target.value});
                        autoGrow(e);
@@ -474,6 +492,7 @@ class StudyApp extends Component {
                        if (me) {
                          me.focus();
                          autoGrow({target: me});
+                         this._cardAnswerDom = me;
                        }
                      }}
                      value={this.state.userEnteredText} />

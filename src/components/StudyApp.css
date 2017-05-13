@@ -29,6 +29,7 @@
     font-weight: bold;
     padding: 20px 40px;
     border-bottom: #ddd dashed 1px;
+    cursor: pointer;
 }
 
 .StudyCard .Card-front.maybeWrong {
@@ -53,6 +54,7 @@
 
 .StudyCard .Card-answer {
     padding: 20px 40px;
+    position: relative;
 }
 
 .StudyCard .Card-answer {
@@ -64,6 +66,19 @@
     width: 100%;
     font-size: 24px;
 }
+
+.StudyCard .Card-answer-overlay {
+    position: absolute;
+    top: -15px;
+    margin-left: -40px;
+    margin-right: -40px;
+    text-align: center;
+    width: 100%;
+    color: #aaa;
+    font-weight: normal;
+    overflow: hidden;
+}
+
 
 .StudyCard .Card-back {
     font-size: 24px;
@@ -88,7 +103,6 @@
 
 .StudyCard .Card-actions button {
     flex: 1;
-    cursor: pointer;
     font-size: 20px;
 }
 
@@ -145,4 +159,34 @@ ul.legend .icon {
 
 ul.legend li.horizontal {
     line-height: inherit;
+}
+
+@media(max-height: 768px) {
+    .StudyApp h3 {
+        font-size: 16px;
+        padding: 15px;
+    }
+    .StudyCard {
+        top: 65px;
+        min-height: calc(100% - 105px);
+    }
+
+    .StudyCard .Card-front, .StudyCard .Card-answer, .StudyCard .Card-back {
+        font-size: 17px;
+        padding: 15px;
+    }
+
+    .StudyCard .Card-answer textarea {
+        font-size: 17px;
+    }
+
+    .StudyCard .Card-actions button {
+        font-size: 17px;
+    }
+
+    .StudyCard .Card-answer-overlay {
+        top: -11px;
+        margin-left: -15px;
+        margin-right: -15px;
+    }
 }
