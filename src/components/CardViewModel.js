@@ -8,6 +8,26 @@ class CardViewModel {
     }
 
     renderFrontText() {
+        if (this.type === 'wanikani-radical' && this.front.indexOf('http') === 0) {
+          return (
+            <div className="card-text-block">
+              <div className='text-line'>
+                <span className="level-indicator">{this.level}</span>
+                <img className='wanikani-character' src={this.front} />
+              </div>
+            </div>
+          );
+        }
+        else if (this.type.indexOf('wanikani') === 0) {
+          return (
+            <div className="card-text-block">
+              <div className='text-line'>
+                <span className="level-indicator">{this.level}</span>
+                {this.front}
+              </div>
+            </div>
+          );
+        }
         if (this.sound_uri && !this.reverse) {
             return this._renderText(
                 this.front + ' [sound:' + this.sound_uri + ']'
@@ -23,9 +43,9 @@ class CardViewModel {
         backText = this.splitNotes()[0];
 
         if (this.sound_uri && this.reverse) {
-            return this._renderText(backText + ' [sound:' + this.sound_uri + ']');
+            return this._renderText(backText + ' [sound:' + this.sound_uri + ']', true);
         } else {
-            return this._renderText(backText);
+            return this._renderText(backText, true);
         }
     }
 
@@ -47,20 +67,45 @@ class CardViewModel {
     }
 
     hasNotes() {
+      if (this.type.indexOf('wanikani') === 0) {
+        return true;
+      }
       return this.splitNotes()[1].length > 0;
     }
 
     renderNotes() {
+        if (this.type.indexOf('wanikani') === 0) {
+          const output = [];
+          const names = {
+            'name_mnemonic': 'Mnemonic',
+            'reading_mnemonic': 'Reading Mnemonic',
+            'meaning_mnemonic': 'Meaning Mnemonic',
+          };
+
+          ['name_mnemonic', 'meaning_mnemonic', 'reading_mnemonic'].forEach(key => {
+            if (this[key]) {
+              output.push(
+                <div className='wanikani-section'>
+                  <div className='header'>{names[key]}</div>
+                  <div className='contents' dangerouslySetInnerHTML={{__html: this[key]}} />
+                </div>
+              );
+            }
+          });
+
+          return <div>{output}</div>;
+        }
+
         var notes = this.splitNotes()[1];
         return this._renderText(notes);
     }
 
-    _renderText(text) {
+    _renderText(text, backText) {
         var lines = text.split("\n");
         return (
           <div className="card-text-block">
             {
-              lines.map((line, idx) => this._renderLine(line, idx))
+              lines.map((line, idx) => this._renderLine(line, idx, backText))
             }
           </div>
         );
@@ -83,7 +128,10 @@ class CardViewModel {
       }
     }
 
-    _renderLine(text, lidx) {
+    _renderLine(text, lidx, backText) {
+      if (text === "") {
+        return <div className='text-line' key={lidx}>&nbsp;</div>;
+      }
       if (text === "Mnemonic:") {
         return <div className="card-notes-header" key={lidx + '.' + text}>{text}</div>;
       }
@@ -95,14 +143,20 @@ class CardViewModel {
         return (
           <div className='text-line' key={lidx + '.' + text}>
             <span className="sounded-text" onClick={() => capturedDom && capturedDom.play()}>
-              {this._renderLine(text.replace(/\s*\[sound:[^\]]*\]/, ""))}
-              <audio ref={audioDom => {capturedDom = audioDom;}}>
+              {this._renderLine(text.replace(/\s*\[sound:[^\]]*\]/, ""), lidx, backText)}
+              <audio ref={audioDom => {capturedDom = audioDom;}} preload="none">
                 <source src={soundUri} />
               </audio>
             </span>
           </div>
         );
       } else {
+        if (backText && this.type.indexOf('wanikani') === -1) {
+          text = text.replace(
+            /[^a-zA-Z0-9čćČĆšđžŠĐŽ().!?,;\[\]*~ ]/g,
+            token => '\\u' + token.charCodeAt(0).toString(16)
+          );
+        }
         var tokenizedString = text.split(/(\*.*?\*)/);
         return (
           <div className='text-line' key={lidx + '.' + text}>

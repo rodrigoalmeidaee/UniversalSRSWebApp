@@ -32,6 +32,38 @@
     cursor: pointer;
 }
 
+.StudyCard.wanikani-radical .Card-answer-overlay,
+.StudyCard.wanikani-kanji .Card-answer-overlay,
+.StudyCard.wanikani-vocabulary .Card-answer-overlay {
+    display: none;
+}
+
+.StudyCard.wanikani-radical .Card-front,
+.StudyCard.wanikani-kanji .Card-front,
+.StudyCard.wanikani-vocabulary .Card-front {
+    color: white;
+    border-bottom: none;
+    text-align: center;
+    font-size: 48px;
+}
+
+.StudyCard .Card-front .wanikani-character {
+    height: 48px;
+    filter: none;
+}
+
+.StudyCard.wanikani-radical .Card-front {
+    background: #00a1f1;
+}
+
+.StudyCard.wanikani-kanji .Card-front {
+    background: #f100a1;
+}
+
+.StudyCard.wanikani-vocabulary .Card-front {
+    background: #a100f1;
+}
+
 .StudyCard .Card-front.maybeWrong {
     background: #FFD51A;
     transition: background-color 0.5s ease;
@@ -50,6 +82,12 @@
 .StudyCard .Card-front.easy {
     background: rgb(158, 218, 229);
     transition: background-color 0.3s ease;
+}
+
+.Card-answer .flag-icon-jp {
+    border: #ddd solid 1px;
+    padding: 2px 2px 2px 2px;
+    margin-top: -1px;
 }
 
 .StudyCard .Card-answer {
@@ -160,6 +198,20 @@ ul.legend .icon {
 ul.legend li.horizontal {
     line-height: inherit;
 }
+
+.StudyCard .level-indicator {
+    font-size: 14px;
+    position: absolute;
+    right: 0px;
+    top: -50px;
+    background: none;
+    font-weight: normal;
+}
+
+.StudyCard .level-indicator::before {
+    content: 'WL #';
+}
+
 
 @media(max-height: 768px) {
     .StudyApp h3 {

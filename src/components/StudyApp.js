@@ -316,7 +316,7 @@ class StudyApp extends Component {
         });
       } else {
         this.setState({
-          studyOrder: studyOrder.concat(shuffle(cardsAdded)),
+          studyOrder: studyOrder.concat(this.props.deck.ordered ? cardsAdded : shuffle(cardsAdded)),
           studyIndex: studyIndex + 1
         });
       }
@@ -487,7 +487,7 @@ class StudyApp extends Component {
               session: {progress.progress.percent.toFixed(0)}% complete
             </small>
           </h3>
-          <div className="StudyCard">
+          <div className={`StudyCard ${card.type}`}>
             <div className={`Card-front ${this.state.flashAnswer || ''}`}
                  onDoubleClick={() => this.onFlipRequested()}>
               {card.renderFrontText()}

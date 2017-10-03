@@ -84,6 +84,23 @@ class CardsList extends Component {
     }
   }
 
+  _renderCard(deck, card) {
+    const CardClass = (card.type.indexOf('wanikani') === 0) ? WanikaniCard : Card;
+
+    return (
+      <CardClass
+        card={card}
+        key={card.id}
+        updateCard={(cardId, updates) => this.props.updateCard(deck.id, cardId, updates)}
+        removeCard={(cardId) => this.props.removeCard(deck.id, cardId) }
+        onEditStateChanged={editing => this.setState({[card.id + '_editing']: editing})}
+        isTwoWayTranslation={
+          _isTwoWayTranslation(card, deck.cards[deck.cards.indexOf(card) + 1])
+        }
+      />
+    );
+  }
+
   render() {
     if (!this.props.deck || this.props.deck.isFetching) {
       return (
@@ -107,16 +124,7 @@ class CardsList extends Component {
               deck.cards[0] === card ||
               this.state[deck.cards[deck.cards.indexOf(card) - 1].id + '_editing'] ||
               !_isTwoWayTranslation(card, deck.cards[deck.cards.indexOf(card) - 1])
-            )).map((card) => <Card
-              card={card}
-              key={card.id}
-              updateCard={(cardId, updates) => this.props.updateCard(deck.id, cardId, updates)}
-              removeCard={(cardId) => this.props.removeCard(deck.id, cardId) }
-              onEditStateChanged={editing => this.setState({[card.id + '_editing']: editing})}
-              isTwoWayTranslation={
-                _isTwoWayTranslation(card, deck.cards[deck.cards.indexOf(card) + 1])
-              } />
-            )
+            )).map(card => this._renderCard(deck, card))
           }
           <hr />
           {
@@ -238,6 +246,28 @@ class Card extends Component {
   }
 }
 
+class WanikaniCard extends Component {
+
+  render() {
+    var card = new CardViewModel(this.props.card);
+
+    return (
+      <div className={`Card ${this.props.card.type}`}>
+        <div className="Card-body">
+          <div className="Card-front">
+            {card.renderFrontText()}
+          </div>
+          <div className="Card-back">
+            {card.renderBackText()}
+          </div>
+          <div className="Card-notes">
+            {card.renderNotes()}
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
 
 class NewCard extends Component {
 
