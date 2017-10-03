@@ -133,7 +133,7 @@ const raiseForStatus = response => {
 export function fetchDecks() {
     return function(dispatch) {
         dispatch(requestDecks());
-        const userId = process.env.REACT_APP_USER_ID || prompt('Enter your user id');
+        const userId = localStorage.getItem('usrsusr') || prompt('Enter your user id');
 
         return fetch(process.env.REACT_APP_API_HOST + '/decks?p=' + userId)
             .then(raiseForStatus)
