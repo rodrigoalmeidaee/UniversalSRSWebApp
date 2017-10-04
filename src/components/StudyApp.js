@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import React, { Component } from 'react';
 import {BarChart, LineChart, Legend} from 'react-easy-chart';
+import { toKana } from 'wanakana';
 
 import { fetchStudySession, submitAnswers, fetchDeck } from '../actions'
 
@@ -19,6 +20,7 @@ const COLORS = {
   '2w-1m': 'rgb(247, 182, 210)',
   '1m+': 'rgb(188, 189, 34)'
 };
+
 const NEW_CARDS_BLOCK_SIZE = 10;
 const OLD_CARDS_BLOCK_SIZE = 20;
 
@@ -196,6 +198,31 @@ class StudyApp extends Component {
     }
   }
 
+  _applyConversions(text) {
+    var card = new CardViewModel(
+      this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
+    );
+    if (card.type === 'wanikani-kanji' || card.type === 'wanikani-vocabulary') {
+      var lines = text.split("\n");
+      if (lines.length !== 2) {
+        return text;
+      }
+      const allRomajiChars = [];
+      for (var i = 0; i < lines[1].length; ++i) {
+        if (/[a-zA-Z]/.test(lines[1][i])) {
+          allRomajiChars.push(lines[1][i]);
+        }
+      }
+
+      if (allRomajiChars.length == 1 && allRomajiChars[0] === 'n') {
+        return text;
+      }
+
+      return lines[0] + "\n" + toKana(lines[1].replace(/nn/g, "n"));
+    }
+    return text;
+  }
+
   handleInput(e) {
     var submitting = this.state.flashAnswer && this.state.flashAnswer.indexOf("maybe") != 0;
     var canAcceptText = !this.state.cardFlipped && !submitting;
@@ -209,13 +236,17 @@ class StudyApp extends Component {
       this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
     );
     var isSingleLineAnswer = !card.acceptableAnswers().find(a => a.split("\n").length != 1);
+    var isWanikaniSecondEnter = (
+      (card.type === 'wanikani-kanji' || card.type === 'wanikani-vocabulary')
+      && e.target.value.split("\n").length === 2
+    );
 
     this.lastEventKeyCode = e.keyCode;
     this.lastEventTimestamp = new Date().getTime();
 
     if (e.keyCode === 13) {
       console.log("isEnter", isSingleLineAnswer, doubleEnter);
-      if (isSingleLineAnswer || doubleEnter) {
+      if (isSingleLineAnswer || doubleEnter || isWanikaniSecondEnter) {
         e.preventDefault();
         this.onFlipRequested(e);
       } else {
@@ -501,7 +532,7 @@ class StudyApp extends Component {
               <textarea
                      onKeyDown={this.handleInput.bind(this)}
                      onChange={e => {
-                       this.setState({userEnteredText: e.target.value});
+                       this.setState({userEnteredText: this._applyConversions(e.target.value)});
                        autoGrow(e);
                      }}
                      style={{height: '5px'}}

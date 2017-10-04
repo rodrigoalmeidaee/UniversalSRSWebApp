@@ -30,6 +30,7 @@
 }
 
 .CardsList .Card {
+    position: relative;
     display: flex;
     flex-orientation: horizontal;
     background: white;
@@ -72,6 +73,11 @@
 
 .Card.wanikani-vocabulary {
     border-left: #a100f1 solid 5px;
+}
+
+.Card.wanikani-radical, .Card.wanikani-kanji, .Card.wanikani-vocabulary {
+    flex-basis: 230px;
+    margin-right: 20px;
 }
 
 .Card .Card-body {
@@ -197,7 +203,12 @@
 
 .Card-front .wanikani-character {
     height: 16px;
+    padding-bottom: 1px;
     filter: invert(100%);
+}
+
+.Card-dependency .wanikani-character {
+    height: 16px;
 }
 
 .Card-front .level-indicator {
@@ -235,6 +246,10 @@
     background: #a100f1;
 }
 
+.wanikani-section .reading-highlight {
+    background: #474747;
+}
+
 .wanikani-section .header {
     font-weight: bold;
 }
@@ -261,4 +276,50 @@
     color: #555;
     text-transform: uppercase;
     text-shadow: 0 1px 0 #fff;
+}
+
+.Card-body.locked {
+    opacity: 0.5;
+}
+
+.Card-dependencies {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+}
+
+.Card-dependencies .Card-dependency {
+    display: inline-block;
+    position: relative;
+    margin-right: 8px;
+    padding: 1px 4px;
+    color: white;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    white-space: nowrap;
+    border-radius: 3px;
+    box-shadow: 0 -2px 0 rgba(0,0,0,0.2) inset;
+}
+
+.Card-dependency.wanikani-radical {
+    background: #00a1f1;
+}
+
+.Card-dependency.wanikani-kanji {
+    background: #f100a1;
+}
+
+.Card-dependency.locked {
+    opacity: 0.5;
+}
+
+.Card-dependency .srs-level-smid {
+    position: absolute;
+    font-size: 10px;
+    bottom: -9px;
+    right: -7px;
+    background: inherit;
+    width: 12px;
+    height: 12px;
+    border: white solid 1px;
+    border-radius: 6px;
 }

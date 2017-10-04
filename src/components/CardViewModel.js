@@ -61,6 +61,11 @@ class CardViewModel {
     }
 
     acceptableAnswers() {
+        if (this.type === 'wanikani-kanji' || this.type === 'wanikani-vocabulary') {
+          return [
+            this.back.replace("\n\n", "\n").replace("Readings: ", "").replace(" (onyomi)", "").replace(" (kunyomi)", "")
+          ];
+        }
         return [
             this.splitNotes()[0].replace(/\s*\[sound:[^\]]*\]/g, "")
         ];

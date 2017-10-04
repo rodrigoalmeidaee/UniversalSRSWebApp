@@ -84,12 +84,13 @@ class CardsList extends Component {
     }
   }
 
-  _renderCard(deck, card) {
+  _renderCard(deck, card, cardsById) {
     const CardClass = (card.type.indexOf('wanikani') === 0) ? WanikaniCard : Card;
 
     return (
       <CardClass
         card={card}
+        dependencies={(card.depends_on || []).map(dep => cardsById[dep])}
         key={card.id}
         updateCard={(cardId, updates) => this.props.updateCard(deck.id, cardId, updates)}
         removeCard={(cardId) => this.props.removeCard(deck.id, cardId) }
@@ -109,6 +110,8 @@ class CardsList extends Component {
     }
 
     var deck = this.props.deck;
+    var cardsById = {};
+    deck.cards.forEach(card => { cardsById[card.id] = card });
 
     return (
       <div className="DeckDetails">
@@ -118,13 +121,17 @@ class CardsList extends Component {
             Language: <span className={ `flag-icon flag-icon-${deck.language}` } />
           </small>
         </h3>
-        <div className="CardsList">
+        <div className="CardsList" style={ deck.id === '59cfec2e4b0836688279220d' ? {
+            display: 'flex',
+            'flex-direction': 'row',
+            'flex-wrap': 'wrap',
+        } : {}}>
           {
             deck.cards.filter(card => (
               deck.cards[0] === card ||
               this.state[deck.cards[deck.cards.indexOf(card) - 1].id + '_editing'] ||
               !_isTwoWayTranslation(card, deck.cards[deck.cards.indexOf(card) - 1])
-            )).map(card => this._renderCard(deck, card))
+            )).map(card => this._renderCard(deck, card, cardsById))
           }
           <hr />
           {
@@ -248,21 +255,43 @@ class Card extends Component {
 
 class WanikaniCard extends Component {
 
+  constructor() {
+    super();
+    this.state = {expanded: false};
+  }
+
   render() {
     var card = new CardViewModel(this.props.card);
+    var dependencies = this.props.dependencies;
 
     return (
-      <div className={`Card ${this.props.card.type}`}>
-        <div className="Card-body">
+      <div className={`Card ${this.props.card.type}`}
+           onDoubleClick={() => { this.setState({expanded: !this.state.expanded}); }}>
+        <div className={`Card-body ${dependencies.find(dep => !(dep.srs_level >= 4)) ? 'locked' : 'unlocked'}`}>
           <div className="Card-front">
             {card.renderFrontText()}
           </div>
           <div className="Card-back">
             {card.renderBackText()}
           </div>
-          <div className="Card-notes">
-            {card.renderNotes()}
-          </div>
+          { this.state.expanded
+            ?
+              <div className="Card-notes">
+                {card.renderNotes()}
+              </div>
+            : null
+          }
+        </div>
+        <div className="Card-dependencies">
+          {
+            dependencies.map(dep =>
+              <div key={dep.id} className={`Card-dependency ${dep.type} ${dep.srs_level >= 4 ? 'unlocked' : 'locked'}`}>
+                {dep.front.indexOf('http') === 0 ?
+                  <img src={dep.front} className='wanikani-character' /> : dep.front}
+                <span className="srs-level-smid">{dep.srs_level || '-'}</span>
+              </div>
+            )
+          }
         </div>
       </div>
     )

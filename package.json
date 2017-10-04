@@ -18,7 +18,8 @@
     "react-router-dom": "^4.1.1",
     "redux": "^3.6.0",
     "redux-logger": "^3.0.1",
-    "redux-thunk": "^2.2.0"
+    "redux-thunk": "^2.2.0",
+    "wanakana": "^2.3.0"
   },
   "devDependencies": {
     "react-scripts": "0.9.5"
