@@ -250,3 +250,14 @@ ul.legend li.horizontal {
         margin-right: -15px;
     }
 }
+
+.wanikani-vocabulary .sounded-text {
+    text-decoration: none;
+    pointer-events: none;
+}
+
+.wanikani-vocabulary .maybeWrong .sounded-text,
+.wanikani-vocabulary .maybeRight .sounded-text
+{
+    pointer-events: auto;
+}

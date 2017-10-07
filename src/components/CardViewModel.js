@@ -23,7 +23,11 @@ class CardViewModel {
             <div className="card-text-block">
               <div className='text-line'>
                 <span className="level-indicator">{this.level}</span>
-                {this.front}
+                {
+                  this.sound_uri
+                    ? this._renderAudio(this.sound_uri, this.front)
+                    : this.front
+                }
               </div>
             </div>
           );
@@ -133,6 +137,19 @@ class CardViewModel {
       }
     }
 
+    _renderAudio(soundUri, text) {
+      var capturedDom;
+
+      return (
+        <span className="sounded-text" onClick={() => capturedDom && capturedDom.play()}>
+          {text}
+          <audio ref={audioDom => {capturedDom = audioDom;}} preload="none" key={soundUri}>
+            <source src={soundUri} />
+          </audio>
+        </span>
+      );
+    }
+
     _renderLine(text, lidx, backText) {
       if (text === "") {
         return <div className='text-line' key={lidx}>&nbsp;</div>;
@@ -147,21 +164,13 @@ class CardViewModel {
 
         return (
           <div className='text-line' key={lidx + '.' + text}>
-            <span className="sounded-text" onClick={() => capturedDom && capturedDom.play()}>
-              {this._renderLine(text.replace(/\s*\[sound:[^\]]*\]/, ""), lidx, backText)}
-              <audio ref={audioDom => {capturedDom = audioDom;}} preload="none">
-                <source src={soundUri} />
-              </audio>
-            </span>
+            {this._renderAudio(
+              soundUri,
+              this._renderLine(text.replace(/\s*\[sound:[^\]]*\]/, ""), lidx, backText))
+            }
           </div>
         );
       } else {
-        if (backText && this.type.indexOf('wanikani') === -1) {
-          text = text.replace(
-            /[^a-zA-Z0-9čćČĆšđžŠĐŽ().!?,;\[\]*~ ]/g,
-            token => '\\u' + token.charCodeAt(0).toString(16)
-          );
-        }
         var tokenizedString = text.split(/(\*.*?\*)/);
         return (
           <div className='text-line' key={lidx + '.' + text}>

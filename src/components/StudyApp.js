@@ -63,6 +63,17 @@ const normalizeGraphs0 = function(graphs, ...seriesNames) {
     });
   });
 
+  var dates = keys.map(k => Date.parse(k));
+  var minDate = Math.min.apply(Math, dates);
+  var maxDate = Math.max.apply(Math, dates);
+  while (minDate < maxDate) {
+    minDate += 86400*1000
+    var currDate = new Date(minDate).toISOString().substring(0, 10);
+    if (keys.indexOf(currDate) === -1) {
+      keys.push(currDate);
+    }
+  }
+
   series.forEach(s => {
     keys.forEach(key => {
       if (s.findIndex(xy => xy.x === key) == -1) {
@@ -207,14 +218,14 @@ class StudyApp extends Component {
       if (lines.length !== 2) {
         return text;
       }
-      const allRomajiChars = [];
+      var allRomajiChars = "";
       for (var i = 0; i < lines[1].length; ++i) {
         if (/[a-zA-Z]/.test(lines[1][i])) {
-          allRomajiChars.push(lines[1][i]);
+          allRomajiChars += lines[1][i];
         }
       }
 
-      if (allRomajiChars.length == 1 && allRomajiChars[0] === 'n') {
+      if (allRomajiChars.toLowerCase() == 'n' || allRomajiChars.toLowerCase() == 'ny') {
         return text;
       }
 
@@ -369,7 +380,12 @@ class StudyApp extends Component {
       var card = new CardViewModel(
         this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
       );
-      if (!card.reverse && document.querySelectorAll('audio').length === 1) {
+      const shouldPlayAudio = (
+        !card.reverse
+        && card.type !== 'wanikani-vocabulary'
+        && document.querySelectorAll('audio').length === 1
+      );
+      if (shouldPlayAudio) {
         document.querySelector('audio').play();
       }
     }
@@ -377,7 +393,11 @@ class StudyApp extends Component {
       var card = new CardViewModel(
         this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
       );
-      if (card.reverse && document.querySelectorAll('audio').length === 1) {
+      const shouldPlayAudio = (
+        (card.reverse || card.type === 'wanikani-vocabulary')
+        && document.querySelectorAll('audio').length === 1
+      );
+      if (shouldPlayAudio) {
         var audioDom = document.querySelector('audio');
         if (this.state.moveToNextCard) {
           var throttle = function(callable, delayMs) {
