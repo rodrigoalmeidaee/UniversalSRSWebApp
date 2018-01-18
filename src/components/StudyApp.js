@@ -342,7 +342,7 @@ class StudyApp extends Component {
       for (var i = 0; i < cardStack.length && cardsAdded.length < OLD_CARDS_BLOCK_SIZE; ++i) {
         if (!cardStack[i].is_new && !cardStack[i]._finished) {
           cardsAdded.push(i);
-          cardsSource = 'new';
+          cardsSource = 'old';
         }
       }
 
@@ -350,7 +350,7 @@ class StudyApp extends Component {
         for (i = 0; i < cardStack.length && cardsAdded.length < NEW_CARDS_BLOCK_SIZE; ++i) {
           if (cardStack[i].is_new && !cardStack[i]._finished) {
             cardsAdded.push(i);
-            cardsSource = 'old';
+            cardsSource = 'new';
           }
         }
       }
