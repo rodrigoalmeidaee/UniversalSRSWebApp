@@ -337,10 +337,12 @@ class StudyApp extends Component {
   moveIndex(studyOrder, studyIndex, cardStack) {
     if (studyIndex === studyOrder.length - 1) {
       var cardsAdded = [];
+      var cardsSource = null;
 
       for (var i = 0; i < cardStack.length && cardsAdded.length < OLD_CARDS_BLOCK_SIZE; ++i) {
         if (!cardStack[i].is_new && !cardStack[i]._finished) {
           cardsAdded.push(i);
+          cardsSource = 'new';
         }
       }
 
@@ -348,6 +350,7 @@ class StudyApp extends Component {
         for (i = 0; i < cardStack.length && cardsAdded.length < NEW_CARDS_BLOCK_SIZE; ++i) {
           if (cardStack[i].is_new && !cardStack[i]._finished) {
             cardsAdded.push(i);
+            cardsSource = 'old';
           }
         }
       }
@@ -358,7 +361,7 @@ class StudyApp extends Component {
         });
       } else {
         this.setState({
-          studyOrder: studyOrder.concat(this.props.deck.ordered ? cardsAdded : shuffle(cardsAdded)),
+          studyOrder: studyOrder.concat((this.props.deck.ordered && cardsSource == 'new') ? cardsAdded : shuffle(cardsAdded)),
           studyIndex: studyIndex + 1
         });
       }

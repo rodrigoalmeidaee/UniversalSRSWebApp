@@ -137,7 +137,10 @@ export function fetchDecks() {
 
         return fetch(process.env.REACT_APP_API_HOST + '/decks?p=' + userId)
             .then(raiseForStatus)
-            .then(response => response.json())
+            .then(response => {
+                localStorage.setItem('usrsusr', userId);
+                return response.json();
+            })
             .then(json => dispatch(receiveDecks(json)));
     };
 }

@@ -27,6 +27,9 @@ class DecksList extends Component {
         <div className="DecksList">
           <h3>Available Decks</h3>
           {this.props.decks.map(deck => <Deck deck={deck} key={deck.id} />)}
+          <p>
+            <a href="javascript:void(0)" onClick={() => { localStorage.setItem('usrsusr', ''); window.location.reload(); }}>logout</a>
+          </p>
         </div>
       );
     } else {
