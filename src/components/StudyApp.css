@@ -261,3 +261,7 @@ ul.legend li.horizontal {
 {
     pointer-events: auto;
 }
+
+.wanikani-font {
+    font-family: "Hiragino Kaku Gothic Pro", "Meiryo", "Source Han Sans Japanese", "NotoSansCJK", "TakaoPGothic", "Yu Gothic", "ヒラギノ角ゴ Pro W3", "メイリオ", "Osaka", "MS PGothic", "ＭＳ Ｐゴシック", sans-serif;
+}

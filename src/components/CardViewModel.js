@@ -10,7 +10,7 @@ class CardViewModel {
     renderFrontText() {
         if (this.type === 'wanikani-radical' && this.front.indexOf('http') === 0) {
           return (
-            <div className="card-text-block">
+            <div className="card-text-block wanikani-font">
               <div className='text-line'>
                 <span className="level-indicator">{this.level}</span>
                 <img className='wanikani-character' src={this.front} />
@@ -20,7 +20,7 @@ class CardViewModel {
         }
         else if (this.type.indexOf('wanikani') === 0) {
           return (
-            <div className="card-text-block">
+            <div className="card-text-block wanikani-font">
               <div className='text-line'>
                 <span className="level-indicator">{this.level}</span>
                 {
