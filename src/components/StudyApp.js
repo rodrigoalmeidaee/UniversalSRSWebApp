@@ -636,26 +636,65 @@ class StudyApp extends Component {
         {key: 'Reviews', color: COLORS['today']},
       ];
 
+      var newCardsWeekly = [];
+      var reviewedCardsWeekly = [];
+      var weekStart = getWeekStart();
+      var weekEnd = new Date(weekStart.getTime() + 7 * 24 * 3600 * 1000);
+      var detailDateLimit = isoDate(new Date(new Date().getTime() - 30 * 24 * 3600 * 1000));
+
+      while (newCardsData.length && isoDate(weekEnd) >= newCardsData[0].x
+             || reviewedCardsData.length && isoDate(weekEnd) >= reviewedCardsData.x) {
+        newCardsWeekly.splice(0, 0, {
+          x: isoDate(weekStart),
+          y: newCardsData.filter(dp => dp.x >= isoDate(weekStart) && dp.x < isoDate(weekEnd)).reduce((accum, dp) => accum + dp.y, 0),
+        });
+        reviewedCardsWeekly.splice(0, 0, {
+          x: isoDate(weekStart),
+          y: reviewedCardsData.filter(dp => dp.x >= isoDate(weekStart) && dp.x < isoDate(weekEnd)).reduce((accum, dp) => accum + dp.y, 0),
+        });
+
+        weekEnd = weekStart;
+        weekStart = new Date(weekStart.getTime() - 7 * 24 * 3600 * 1000);
+      }
+
       return (
         <div>
-          <h4>Cards studied per day</h4>
-          <Legend
-            data={legend}
-            horizontal
-            dataId={'key'}
-            config={legend} />
-          <LineChart
-            xType={'text'}
-            width={500}
-            height={200}
-            axes
-            grid
-            data={[newCardsData, reviewedCardsData]}
-            lineColors={[COLORS['new'], COLORS['today']]}
-            yDomainRange={[0, Math.max(...(
-              newCardsData.map(dp => dp.y).concat(reviewedCardsData.map(dp => dp.y))
-            ))]}
-          />
+          <div>
+            <h4>Cards studied per day</h4>
+            <Legend
+              data={legend}
+              horizontal
+              dataId={'key'}
+              config={legend} />
+            <LineChart
+              xType={'text'}
+              width={500}
+              height={200}
+              axes
+              grid
+              data={[newCardsData.filter(dp => dp.x >= detailDateLimit),
+                     reviewedCardsData.filter(dp => dp.x >= detailDateLimit)]}
+              lineColors={[COLORS['new'], COLORS['today']]}
+              yDomainRange={[0, Math.max(...(
+                newCardsData.map(dp => dp.y).concat(reviewedCardsData.map(dp => dp.y))
+              ))]}
+            />
+          </div>
+          <div>
+            <h4>Cards studied per week</h4>
+            <LineChart
+              xType={'text'}
+              width={500}
+              height={200}
+              axes
+              grid
+              data={[newCardsWeekly, reviewedCardsWeekly]}
+              lineColors={[COLORS['new'], COLORS['today']]}
+              yDomainRange={[0, Math.max(...(
+                newCardsWeekly.map(dp => dp.y).concat(reviewedCardsWeekly.map(dp => dp.y))
+              ))]}
+            />
+          </div>
         </div>
       );
     }
@@ -719,6 +758,16 @@ class StudyApp extends Component {
   }
 }
 
+var getWeekStart = function() {
+  const now = new Date(new Date().getTime() - 7 * 3600 * 1000);
+  return new Date(
+    now.getTime() - ((now.getDay() === 0) ? 6 : now.getDay() - 1) * 24 * 3600 * 1000
+  );
+}
+
+var isoDate = function(date) {
+  return date.toISOString().substring(0, 10);
+}
 
 StudyApp = connect(
   function mapStateToProps(state, ownProps) {
