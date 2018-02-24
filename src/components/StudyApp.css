@@ -264,4 +264,21 @@ ul.legend li.horizontal {
 
 .wanikani-font {
     font-family: "Hiragino Kaku Gothic Pro", "Meiryo", "Source Han Sans Japanese", "NotoSansCJK", "TakaoPGothic", "Yu Gothic", "ヒラギノ角ゴ Pro W3", "メイリオ", "Osaka", "MS PGothic", "ＭＳ Ｐゴシック", sans-serif;
+    font-weight: normal;
+}
+
+.context-sentence {
+    margin-top: 10px;
+}
+
+.context-sentence + .context-sentence {
+    margin-top: 20px;
+}
+
+.reveal-on-hover-container .reveal-on-hover {
+    visibility: hidden;
+}
+
+.reveal-on-hover-container:hover .reveal-on-hover {
+    visibility: visible
 }

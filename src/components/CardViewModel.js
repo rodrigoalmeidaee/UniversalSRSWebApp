@@ -94,13 +94,31 @@ class CardViewModel {
           ['name_mnemonic', 'meaning_mnemonic', 'reading_mnemonic'].forEach(key => {
             if (this[key]) {
               output.push(
-                <div className='wanikani-section'>
+                <div className='wanikani-section' key={key}>
                   <div className='header'>{names[key]}</div>
                   <div className='contents' dangerouslySetInnerHTML={{__html: this[key]}} />
                 </div>
               );
             }
           });
+
+          if (this.context_sentences && this.context_sentences.length) {
+            output.push(
+              <div className='wanikani-section' key='context_sentences'>
+                <div className='header'>Context Sentences</div>
+                <div className='contents'>
+                  {
+                    this.context_sentences.map((sentence, index) =>
+                      <div className='context-sentence reveal-on-hover-container' key={index}>
+                        <div className='wanikani-font'>{sentence.japanese}</div>
+                        <div className='reveal-on-hover'>{sentence.english}</div>
+                      </div>
+                    )
+                  }
+                </div>
+              </div>
+            );
+          }
 
           return <div>{output}</div>;
         }
