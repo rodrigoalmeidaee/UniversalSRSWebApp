@@ -517,6 +517,15 @@ class StudyApp extends Component {
               }
             />
           </div>
+          <div className="StudyDueDistribution">
+            <BarChart
+              axes
+              data={studySession['workload_prediction'].map(function(point) {
+                point.x = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"][new Date(point.x + "T12:00:00Z").getDay()];
+                return point;
+              })}
+            />
+          </div>
           <div className="StudyActions">
             {
               (studySession.due_cards.length > 0 || studySession.new_cards.length > 0)
