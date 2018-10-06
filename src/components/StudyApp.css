@@ -1,3 +1,23 @@
+@font-face {
+    font-family: 'darts font';
+    src: url(/dartsfont.woff);
+}
+
+@font-face {
+    font-family: Hosofuwafont;
+    src: url(/Hosohuwafont.ttf);
+}
+
+@font-face {
+    font-family: cinecaption;
+    src: url(/cinecaption2.28.ttf);
+}
+
+@font-face {
+    font-family: 'Hakushy Kaisho Bold';
+    src: url(/hkgokukaikk.ttf);
+}
+
 .StudyApp {
     padding: 40px;
     background: white;
@@ -265,6 +285,10 @@ ul.legend li.horizontal {
 .wanikani-font {
     font-family: "Hiragino Kaku Gothic Pro", "Meiryo", "Source Han Sans Japanese", "NotoSansCJK", "TakaoPGothic", "Yu Gothic", "ヒラギノ角ゴ Pro W3", "メイリオ", "Osaka", "MS PGothic", "ＭＳ Ｐゴシック", sans-serif;
     font-weight: normal;
+}
+
+.wanikani-font:hover {
+    font-family: "Hiragino Kaku Gothic Pro", "Meiryo", "Source Han Sans Japanese", "NotoSansCJK", "TakaoPGothic", "Yu Gothic", "ヒラギノ角ゴ Pro W3", "メイリオ", "Osaka", "MS PGothic", "ＭＳ Ｐゴシック", sans-serif !important;
 }
 
 .context-sentence {

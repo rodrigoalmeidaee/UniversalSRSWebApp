@@ -1,5 +1,7 @@
 import React from 'react';
 
+import WanikaniFonts from './WanikaniFonts';
+
 
 class CardViewModel {
 
@@ -19,8 +21,13 @@ class CardViewModel {
           );
         }
         else if (this.type.indexOf('wanikani') === 0) {
+          const wanikaniStyle = {};
+          if (!this.is_new) {
+            wanikaniStyle = { fontFamily: WanikaniFonts.getRandomFont(this.front) };
+          }
+
           return (
-            <div className="card-text-block wanikani-font">
+            <div className="card-text-block wanikani-font" style={wanikaniStyle}>
               <div className='text-line'>
                 <span className="level-indicator">{this.level}</span>
                 {
@@ -108,12 +115,16 @@ class CardViewModel {
                 <div className='header'>Context Sentences</div>
                 <div className='contents'>
                   {
-                    this.context_sentences.map((sentence, index) =>
-                      <div className='context-sentence reveal-on-hover-container' key={index}>
-                        <div className='wanikani-font'>{sentence.japanese}</div>
-                        <div className='reveal-on-hover'>{sentence.english}</div>
-                      </div>
-                    )
+                    this.context_sentences.map((sentence, index) => {
+                      const wanikaniStyle = { fontFamily: WanikaniFonts.getRandomFont(sentence.japanese) };
+
+                      return (
+                        <div className='context-sentence reveal-on-hover-container' key={index}>
+                          <div className='wanikani-font' style={wanikaniStyle}>{sentence.japanese}</div>
+                          <div className='reveal-on-hover'>{sentence.english}</div>
+                        </div>
+                      );
+                    })
                   }
                 </div>
               </div>
