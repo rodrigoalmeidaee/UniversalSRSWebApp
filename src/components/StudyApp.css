@@ -277,9 +277,30 @@ ul.legend li.horizontal {
 }
 
 .wanikani-vocabulary .maybeWrong .sounded-text,
-.wanikani-vocabulary .maybeRight .sounded-text
+.wanikani-vocabulary .maybeRight .sounded-text,
+.wanikani-vocabulary .pronunciation-audios .sounded-text
 {
     pointer-events: auto;
+}
+
+.pronunciation-audios {
+    margin-top: 1em;
+}
+
+.pronunciation-option {
+    display: inline-block;
+    margin-right: 10px;
+    padding: 2px 5px;
+    background-color: #a100f1;
+    color: white;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    white-space: nowrap;
+    border-radius: 3px;
+    box-shadow: 0 -2px 0 rgba(0,0,0,0.2) inset;
+}
+
+.pronunciation-option .sounded-text:hover:after {
+    display: none;
 }
 
 .wanikani-font {

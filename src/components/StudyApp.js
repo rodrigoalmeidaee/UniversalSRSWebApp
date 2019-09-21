@@ -410,12 +410,14 @@ class StudyApp extends Component {
       var card = new CardViewModel(
         this.state.cardStack[this.state.studyOrder[this.state.studyIndex]]
       );
+      const audioDom = Array
+        .from(document.querySelectorAll('audio'))
+        .find(e => e.parentNode.textContent.indexOf('Kenichi') >= 0);
       const shouldPlayAudio = (
         (card.reverse || card.type === 'wanikani-vocabulary')
-        && document.querySelectorAll('audio').length === 1
+        && audioDom
       );
       if (shouldPlayAudio) {
-        var audioDom = document.querySelector('audio');
         if (this.state.moveToNextCard) {
           var throttle = function(callable, delayMs) {
             return function() {

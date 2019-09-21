@@ -109,6 +109,26 @@ class CardViewModel {
             }
           });
 
+          if (this.sound_uris && this.sound_uris.length > 1) {
+
+            output.push(
+              <div className='wanikani-section' key='pronunciation_audios'>
+                <div className='header'>Pronunciation Audios</div>
+                <div className='contents'>
+                  <div className='pronunciation-audios'>
+                    {
+                      this.sound_uris.map(option => (
+                        <div className='pronunciation-option'>
+                          {this._renderAudio(option.uri, `${option.reading} • ${option.voice_actor}`)}
+                        </div>
+                      ))
+                    }
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
           if (this.context_sentences && this.context_sentences.length) {
             output.push(
               <div className='wanikani-section' key='context_sentences'>
@@ -170,7 +190,7 @@ class CardViewModel {
       var capturedDom;
 
       return (
-        <span className="sounded-text" onClick={() => capturedDom && capturedDom.play()}>
+        <span className="sounded-text" onClick={() => capturedDom && capturedDom.play() || console.log('no dom :-/')}>
           {text}
           <audio ref={audioDom => {capturedDom = audioDom;}} preload="none" key={soundUri}>
             <source src={soundUri} />
