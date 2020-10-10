@@ -24,6 +24,10 @@
   "devDependencies": {
     "react-scripts": "0.9.5"
   },
+  "engines": {
+    "node": "^8.17.0",
+    "npm": "^6.13.4"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
