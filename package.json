@@ -22,7 +22,7 @@
     "wanakana": "^2.3.0"
   },
   "devDependencies": {
-    "react-scripts": "0.9.5"
+    "react-scripts": "5.0.1"
   },
   "engines": {
     "node": "^8.17.0",
